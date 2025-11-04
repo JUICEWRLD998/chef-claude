@@ -1,0 +1,85 @@
+/* Chef Claude - Clean Professional Styling */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  background-color: #FAFAF8;
+  color: #2D3748;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background-color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo and Title Container - Centered */
+.header .logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  margin-right: 0.75rem;
+}
+
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1A202C;
+  letter-spacing: 0.5px;
+}
+
+/* Navigation */
+.header nav {
+  margin-left: auto;
+}
+
+.header nav ul {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+
+.header nav ul li {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #4A5568;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.header nav ul li:hover {
+  color: #2D3748;
+  background-color: #F7FAFC;
+  transform: translateY(-2px);
+}
+
+.header nav ul li::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 80%;
+  height: 2px;
+  background-color: #FF6B6B;
+  transition: transform 0.3s ease;
+}
+
+.header nav ul li:hover::after {
+  transform: translateX(-50%) scaleX(1);
+}
