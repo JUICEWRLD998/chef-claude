@@ -12,6 +12,15 @@ dist
 dist-ssr
 *.local
 
+# Environment variables - NEVER COMMIT THESE!
+.env
+server/.env
+*.env.local
+.env.*.local
+
+# Server node_modules
+server/node_modules
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
