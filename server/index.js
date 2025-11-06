@@ -10,6 +10,7 @@
 
 const express = require('express');
 const cors = require('cors');
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
@@ -72,37 +73,24 @@ Keep the recipe practical and easy to follow for home cooks.`;
 
     console.log('Generating recipe for ingredients:', ingredientList);
 
-    // Call Gemini API
-    // Using Google's Generative AI REST API
-    const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+    // Call Gemini API using axios with v1 endpoint and gemini-2.5-flash (latest stable model)
+    const geminiEndpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     
-    const geminiResponse = await fetch(geminiEndpoint, {
-      method: 'POST',
+    const geminiResponse = await axios.post(geminiEndpoint, {
+      contents: [{
+        parts: [{
+          text: prompt
+        }]
+      }]
+    }, {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }]
-      })
+      timeout: 30000
     });
 
-    if (!geminiResponse.ok) {
-      const errorData = await geminiResponse.text();
-      console.error('Gemini API error:', errorData);
-      return res.status(geminiResponse.status).json({
-        success: false,
-        error: `Gemini API error: ${geminiResponse.statusText}`
-      });
-    }
-
-    const geminiData = await geminiResponse.json();
-    
     // Extract the generated text from Gemini's response format
-    const recipe = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'No recipe generated';
+    const recipe = geminiResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No recipe generated';
 
     console.log('Recipe generated successfully');
 
@@ -113,10 +101,21 @@ Keep the recipe practical and easy to follow for home cooks.`;
     });
 
   } catch (error) {
-    console.error('Server error:', error);
+    console.error('Server error:', error.message);
+    
+    // Handle axios-specific errors
+    if (error.response) {
+      console.error('Gemini API error status:', error.response.status);
+      console.error('Gemini API error data:', error.response.data);
+      return res.status(error.response.status).json({
+        success: false,
+        error: `Gemini API error: ${error.response.data?.error?.message || error.response.statusText}`
+      });
+    }
+    
     res.status(500).json({
       success: false,
-      error: 'Internal server error while generating recipe'
+      error: 'Internal server error while generating recipe: ' + error.message
     });
   }
 });

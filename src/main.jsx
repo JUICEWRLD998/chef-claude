@@ -1,5 +1,6 @@
 // Main component - handles ingredient list and recipe generation
 import React, { useState } from 'react';
+import { marked } from 'marked';
 
 export default function Main() {
   // State: input field value
@@ -145,9 +146,10 @@ export default function Main() {
       {recipe && (
         <div className="recipe-section">
           <h2 className="section-title">Your Recipe:</h2>
-          <div className="recipe-content">
-            {recipe}
-          </div>
+          <div 
+            className="recipe-content"
+            dangerouslySetInnerHTML={{ __html: marked(recipe) }}
+          />
         </div>
       )}
     </main>

@@ -6,9 +6,9 @@ export default function Header() {
       <h1>Chef Claude</h1>
       <nav>
         <ul>
-          <li>Home</li>
-          <li>About</li>
-          <li>Contact</li>
+          <li className="active" aria-current="page">Generate</li>
+          <li>Cook</li>
+          <li>Discover</li>
         </ul>
       </nav>
     </header>
