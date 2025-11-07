@@ -22,14 +22,20 @@ body {
   padding: 1rem 1.5rem;
   background-color: #FFFFFF;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
-/* Logo and Title Container - Centered */
+/* Logo and Title Container */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .header .logo {
   width: 48px;
   height: 48px;
   object-fit: contain;
-  margin-right: 0.75rem;
 }
 
 .header h1 {
@@ -40,18 +46,54 @@ body {
   letter-spacing: 0.5px;
 }
 
-/* Navigation */
-.header nav {
+/* Hamburger Menu Button - hidden on desktop, visible on mobile */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 25px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1000;
+}
+
+.hamburger-line {
+  width: 30px;
+  height: 3px;
+  background-color: #2D3748;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+/* Hamburger animation when active (X shape) */
+.hamburger.active .hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translateY(8px);
+}
+
+.hamburger.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translateY(-8px);
+}
+
+/* Navigation Menu */
+.nav-menu {
   margin-left: auto;
 }
 
-.header nav ul {
+.nav-menu ul {
   display: flex;
   gap: 2rem;
   list-style: none;
 }
 
-.header nav ul li {
+.nav-menu ul li {
   font-size: 1rem;
   font-weight: 500;
   color: #4A5568;
@@ -62,23 +104,80 @@ body {
   position: relative;
 }
 
-.header nav ul li:hover {
+.nav-menu ul li:hover {
   color: #2D3748;
   background-color: #F7FAFC;
 }
 
 /* Active nav item - solid pill/badge style */
-.header nav ul li.active {
+.nav-menu ul li.active {
   background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
   color: #FFFFFF;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(255, 107, 107, 0.25);
 }
 
-.header nav ul li.active:hover {
+.nav-menu ul li.active:hover {
   background: linear-gradient(135deg, #FF5252 0%, #FF7043 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(255, 107, 107, 0.35);
+}
+
+/* Mobile Menu Styles - visible on screens < 768px */
+@media (max-width: 768px) {
+  /* Show hamburger button on mobile */
+  .hamburger {
+    display: flex;
+  }
+  
+  /* Hide navigation by default on mobile */
+  .nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    margin-left: 0;
+  }
+  
+  /* Show navigation when menu is open */
+  .nav-menu.open {
+    max-height: 300px;
+    padding: 1rem 0;
+  }
+  
+  /* Stack nav items vertically on mobile */
+  .nav-menu ul {
+    flex-direction: column;
+    gap: 0;
+    padding: 0 1.5rem;
+  }
+  
+  .nav-menu ul li {
+    width: 100%;
+    padding: 1rem;
+    text-align: center;
+    border-radius: 8px;
+  }
+  
+  /* Active item styling on mobile */
+  .nav-menu ul li.active {
+    background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  }
+  
+  /* Smaller header title on mobile */
+  .header h1 {
+    font-size: 1.35rem;
+  }
+  
+  .header .logo {
+    width: 40px;
+    height: 40px;
+  }
 }
 
 /* Main Content */
@@ -173,11 +272,38 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
+/* Section header with title and clear button */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
 .section-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: #1A202C;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
+}
+
+/* Clear All button */
+.clear-all-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #718096;
+  background-color: transparent;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-all-btn:hover {
+  color: #FF6B6B;
+  border-color: #FF6B6B;
+  background-color: #FFF5F5;
 }
 
 .ingredient-list {
@@ -425,4 +551,202 @@ body {
   .recipe-section {
     padding: 1.25rem;
   }
+}
+
+/* ===================================
+   COOK PAGE STYLES
+   =================================== */
+
+/* Cook page container */
+.cook-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.cook-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Cook page title */
+.cook-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1A202C;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* YouTube icon in Cook page title */
+.youtube-icon {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+/* Recipe name display */
+.recipe-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2D3748;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Loading state for video search */
+.loading-video {
+  text-align: center;
+  padding: 3rem 1rem;
+  background-color: #F7FAFC;
+  border-radius: 12px;
+  font-size: 1.125rem;
+  color: #4A5568;
+}
+
+/* Video container with responsive aspect ratio */
+.video-container {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* YouTube embed iframe - maintains 16:9 aspect ratio */
+.youtube-video {
+  width: 100%;
+  height: 500px;
+  border: none;
+}
+
+/* Video information section */
+.video-info {
+  padding: 1.5rem;
+  background-color: #FAFAF8;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.video-description {
+  font-size: 1rem;
+  color: #4A5568;
+  line-height: 1.6;
+}
+
+/* Watch on YouTube link */
+.watch-on-youtube {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #FF6B6B;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: color 0.2s ease;
+}
+
+.watch-on-youtube:hover {
+  color: #FF5252;
+  text-decoration: underline;
+}
+
+/* Back link styling */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 1rem;
+  color: #4A5568;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: #2D3748;
+  text-decoration: underline;
+}
+
+/* No video message */
+.no-video {
+  text-align: center;
+  padding: 3rem 1rem;
+  background-color: #F7FAFC;
+  border-radius: 12px;
+}
+
+.no-video p {
+  font-size: 1.125rem;
+  color: #4A5568;
+  margin-bottom: 1rem;
+}
+
+/* Responsive video on mobile */
+@media (max-width: 768px) {
+  .cook-title {
+    font-size: 2rem;
+  }
+  
+  .youtube-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .recipe-name {
+    font-size: 1.25rem;
+  }
+  
+  .youtube-video {
+    height: 250px;
+  }
+  
+  .video-info {
+    padding: 1rem;
+  }
+}
+
+/* Navigation link styling in header */
+.header nav ul li a {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+}
+
+/* Setup instructions in Cook page error state */
+.setup-instructions {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background-color: #FFF5F5;
+  border-radius: 8px;
+  border-left: 4px solid #FF6B6B;
+}
+
+.setup-instructions h3 {
+  font-size: 1.25rem;
+  color: #2D3748;
+  margin-bottom: 0.75rem;
+}
+
+.setup-instructions p {
+  color: #4A5568;
+  margin-bottom: 0.5rem;
+}
+
+.setup-instructions ol {
+  line-height: 1.8;
+  color: #4A5568;
+}
+
+.setup-instructions code {
+  background-color: #EDF2F7;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #2D3748;
 }

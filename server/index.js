@@ -120,6 +120,102 @@ Keep the recipe practical and easy to follow for home cooks.`;
   }
 });
 
+/**
+ * POST /api/youtube-search
+ * 
+ * Searches YouTube for a cooking tutorial video based on the recipe name.
+ * Uses YouTube Data API v3 to find the most relevant cooking video.
+ * 
+ * Request body: { query: "chicken curry recipe cooking tutorial" }
+ * Response: { success: true, videoId: "abc123..." } or { success: false, error: "..." }
+ */
+app.post('/api/youtube-search', async (req, res) => {
+  try {
+    const { query } = req.body;
+
+    // Validate that we have a search query
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid request: search query is required'
+      });
+    }
+
+    // Get YouTube API key from environment variable
+    const youtubeApiKey = process.env.YOUTUBE_API_KEY;
+    
+    if (!youtubeApiKey) {
+      console.error('ERROR: YOUTUBE_API_KEY not found in environment variables');
+      return res.status(500).json({
+        success: false,
+        error: 'Server configuration error: YouTube API key not configured'
+      });
+    }
+
+    console.log('Searching YouTube for:', query);
+
+    // Call YouTube Data API v3 to search for videos
+    // Search parameters:
+    // - part=snippet: Get video metadata
+    // - maxResults=1: Only get the top result
+    // - type=video: Only search for videos (not playlists/channels)
+    // - order=relevance: Sort by most relevant
+    // - videoDefinition=high: Prefer HD videos
+    const youtubeEndpoint = 'https://www.googleapis.com/youtube/v3/search';
+    
+    const youtubeResponse = await axios.get(youtubeEndpoint, {
+      params: {
+        key: youtubeApiKey,
+        q: query,
+        part: 'snippet',
+        type: 'video',
+        maxResults: 1,
+        order: 'relevance',
+        videoDefinition: 'high',
+        safeSearch: 'strict'
+      },
+      timeout: 10000
+    });
+
+    // Check if we got any results
+    if (!youtubeResponse.data.items || youtubeResponse.data.items.length === 0) {
+      return res.json({
+        success: false,
+        error: 'No cooking videos found for this recipe'
+      });
+    }
+
+    // Extract the video ID from the first result
+    const videoId = youtubeResponse.data.items[0].id.videoId;
+
+    console.log('Found YouTube video:', videoId);
+
+    // Return the video ID to the client
+    res.json({
+      success: true,
+      videoId: videoId
+    });
+
+  } catch (error) {
+    console.error('YouTube search error:', error.message);
+    
+    // Handle axios-specific errors
+    if (error.response) {
+      console.error('YouTube API error status:', error.response.status);
+      console.error('YouTube API error data:', error.response.data);
+      return res.status(error.response.status).json({
+        success: false,
+        error: `YouTube API error: ${error.response.data?.error?.message || error.response.statusText}`
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error while searching YouTube: ' + error.message
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Chef Claude server is running' });

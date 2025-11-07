@@ -6,6 +6,7 @@
 2. Replace the empty value with your actual API key:
    ```
    GEMINI_API_KEY=your_actual_gemini_key_here
+   YOUTUBE_API_KEY=           # Leave empty for now (optional - see Step 5)
    PORT=3001
    ```
 3. Save the file
@@ -19,7 +20,7 @@
 Open **PowerShell Terminal #1** and run:
 
 ```powershell
-cd C:\Users\fadhm\OneDrive\Desktop\Chef-claude\Chef-Claude\server
+cd C:\Users\fadhm\OneDrive\Desktop\Chef-claude\server
 npm start
 ```
 
@@ -63,7 +64,22 @@ Open your browser and go to: **http://localhost:5173**
 2. **Build your list** - Add more ingredients (rice, chicken, etc.)
 3. **Get recipe** - Click "Get Recipe" button
 4. **Wait for AI** - The AI will generate a custom recipe
-5. **Cook & enjoy!** 🍳
+5. **Watch tutorial** - Click "Cook" to see a YouTube video (requires YouTube API key)
+6. **Cook & enjoy!** 🍳
+
+---
+
+## STEP 5: (Optional) Enable Cook Page with YouTube Videos
+
+The **Cook page** shows YouTube cooking tutorials for your generated recipes.
+
+**To enable this feature:**
+1. Follow the guide in `YOUTUBE_SETUP.md`
+2. Get a free YouTube Data API key
+3. Add it to `server/.env`: `YOUTUBE_API_KEY=your_key_here`
+4. Restart the server (Ctrl+C in Terminal #1, then `npm run dev` again)
+
+**Note:** The app works fine without this! The Generate page (recipe generation) works independently.
 
 ---
 

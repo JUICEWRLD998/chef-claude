@@ -67,6 +67,18 @@ export default function Main() {
   };
 
   /**
+   * Clear all ingredients and recipe - start fresh
+   */
+  const handleClearAll = () => {
+    setIngredients([]);
+    setRecipe(null);
+    setError(null);
+    // Also clear from localStorage
+    localStorage.removeItem('chefClaude_ingredients');
+    localStorage.removeItem('chefClaude_recipe');
+  };
+
+  /**
    * Call the server proxy to generate a recipe from current ingredients
    * Server will use Gemini API to create the recipe
    */
@@ -145,7 +157,17 @@ export default function Main() {
       {/* Ingredient List - only show if there are ingredients */}
       {ingredients.length > 0 && (
         <div className="ingredients-section">
-          <h2 className="section-title">Your Ingredients:</h2>
+          <div className="section-header">
+            <h2 className="section-title">Your Ingredients:</h2>
+            <button 
+              type="button"
+              className="clear-all-btn"
+              onClick={handleClearAll}
+              aria-label="Clear all ingredients"
+            >
+              Clear All
+            </button>
+          </div>
           <ul className="ingredient-list">
             {ingredients.map((ingredient, index) => (
               <li key={index} className="ingredient-item">
