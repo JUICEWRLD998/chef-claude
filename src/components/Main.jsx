@@ -106,26 +106,63 @@ export default function Main() {
       if (data.success) {
         setRecipe(data.recipe);
         
-        // Extract recipe title from the generated recipe
-        // The AI usually puts the title in the first line with # markdown or as the first sentence
-        // Save it to sessionStorage so Cook page can use it to search YouTube
-        const recipeLines = data.recipe.split('\n');
-        let recipeTitle = recipeLines[0].replace(/^#+\s*/, '').trim(); // Remove markdown # symbols
+        // Extract the actual recipe title (not intro text)
+        // AI often formats the title with emojis or special markers like:
+        // "🍳🍜 Speedy Scrambled Egg & Garlic Noodles 🍜🍳"
+        const recipeLines = data.recipe.split('\n').filter(line => line.trim());
+        let recipeTitle = '';
         
-        // If the title is too long (over 80 chars), it's likely a description, not just a title
-        // Take only the first sentence or first 80 characters
-        if (recipeTitle.length > 80) {
-          // Try to extract just the title (before first colon, period, or exclamation)
-          const titleMatch = recipeTitle.match(/^([^:.!]{1,80})/);
-          if (titleMatch) {
-            recipeTitle = titleMatch[1].trim();
+        // Strategy 1: Look for a line with emojis (AI often uses emojis around the title)
+        const emojiLine = recipeLines.find(line => 
+          /[\u{1F300}-\u{1F9FF}]/u.test(line) && line.length < 100
+        );
+        
+        if (emojiLine) {
+          // Found emoji line - remove emojis and clean it
+          recipeTitle = emojiLine.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
+          recipeTitle = recipeTitle.replace(/^[#*\-_]+\s*/, '').trim(); // Remove markdown
+        } else {
+          // Strategy 2: Look for a line that starts with # (markdown header)
+          const headerLine = recipeLines.find(line => line.startsWith('#'));
+          if (headerLine) {
+            recipeTitle = headerLine.replace(/^#+\s*/, '').trim();
           } else {
-            // Fallback: just take first 80 characters
-            recipeTitle = recipeTitle.substring(0, 80).trim();
+            // Strategy 3: Skip intro lines and find the first short line (likely the title)
+            for (let line of recipeLines) {
+              const cleaned = line.replace(/^#+\s*/, '').trim();
+              // Title is usually short (< 80 chars) and doesn't start with "Hello", "Here's", etc.
+              if (cleaned.length > 10 && cleaned.length < 80 && 
+                  !/^(Hello|Hi|Here'?s|Welcome|With just)/i.test(cleaned)) {
+                recipeTitle = cleaned;
+                break;
+              }
+            }
           }
         }
         
-        sessionStorage.setItem('currentRecipeName', recipeTitle);
+        // Remove common label prefixes like "Recipe Title:", "Title:", "Recipe Name:", etc.
+        recipeTitle = recipeTitle.replace(/^(Recipe\s+Title|Title|Recipe\s+Name|Name)\s*:\s*/i, '').trim();
+        
+        // If there's still a colon, take the part AFTER it (the actual title)
+        if (recipeTitle.includes(':')) {
+          const parts = recipeTitle.split(':');
+          recipeTitle = parts[parts.length - 1].trim();
+        }
+        
+        // Clean up trailing punctuation
+        recipeTitle = recipeTitle.replace(/[.!,;]+$/, '').trim();
+        
+        // Final cleanup: if still too long, truncate at word boundary
+        if (recipeTitle.length > 70) {
+          recipeTitle = recipeTitle.substring(0, 70);
+          const lastSpace = recipeTitle.lastIndexOf(' ');
+          if (lastSpace > 30) {
+            recipeTitle = recipeTitle.substring(0, lastSpace);
+          }
+        }
+        
+        // Save the clean recipe title
+        sessionStorage.setItem('currentRecipeName', recipeTitle || 'Delicious Recipe');
       } else {
         setError(data.error || 'Failed to generate recipe. Please try again.');
       }
@@ -143,7 +180,7 @@ export default function Main() {
       <form className="ingredient-form" onSubmit={handleAddIngredient}>
         <input 
           type="text" 
-          placeholder="e.g. jollof rice" 
+          placeholder="e.g. Input Ingredients" 
           aria-label="Add ingredient"
           className="ingredient-input"
           value={input}

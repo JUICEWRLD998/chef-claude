@@ -1,23 +1,44 @@
-// Main App component with routing between Generate and Cook pages
+// Main App component with routing between Generate, Cook, and Discover pages
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from "./components/Header";
 import Main from "./components/Main";
 import Cook from "./components/Cook";
+import Discover from "./components/Discover";
+import Login from "./components/Login";
+import SignUp from "./components/SignUp";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
   return (
     // Router wraps the entire app to enable navigation between pages
     <Router>
-      {/* Header appears on all pages */}
-      <Header />
-      
       {/* Routes define which component to show based on URL path */}
       <Routes>
-        {/* Generate page - shown at root path "/" */}
-        <Route path="/" element={<Main />} />
+        {/* Public routes - Login and Sign Up */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
         
-        {/* Cook page - shown at "/cook" path */}
-        <Route path="/cook" element={<Cook />} />
+        {/* Protected routes - require authentication */}
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Header />
+            <Main />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/cook" element={
+          <ProtectedRoute>
+            <Header />
+            <Cook />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/discover" element={
+          <ProtectedRoute>
+            <Header />
+            <Discover />
+          </ProtectedRoute>
+        } />
       </Routes>
     </Router>
   );

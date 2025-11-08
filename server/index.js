@@ -216,6 +216,101 @@ app.post('/api/youtube-search', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/youtube-discover
+ * 
+ * Fetches multiple cooking videos for the Discover page
+ * Returns array of video objects with id, title, thumbnail, channel
+ * 
+ * Request body: { query: "pasta recipe tutorial", maxResults: 12 }
+ * Response: { success: true, videos: [{videoId, title, thumbnail, channelTitle}, ...] }
+ */
+app.post('/api/youtube-discover', async (req, res) => {
+  try {
+    const { query, maxResults = 12 } = req.body;
+
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid request: search query is required'
+      });
+    }
+
+    const youtubeApiKey = process.env.YOUTUBE_API_KEY;
+    
+    if (!youtubeApiKey) {
+      console.error('ERROR: YOUTUBE_API_KEY not found');
+      return res.status(500).json({
+        success: false,
+        error: 'Server configuration error: YouTube API key not configured'
+      });
+    }
+
+    console.log('Discover: searching YouTube for:', query, '(max:', maxResults, ')');
+
+    // Search YouTube for food videos
+    // Use safeSearch and add "recipe cooking" to ensure food content only
+    // videoDuration: 'short' filters for videos < 4 minutes (YouTube Shorts are < 60s)
+    const youtubeEndpoint = 'https://www.googleapis.com/youtube/v3/search';
+    
+    const youtubeResponse = await axios.get(youtubeEndpoint, {
+      params: {
+        key: youtubeApiKey,
+        q: query,
+        part: 'snippet',
+        type: 'video',
+        maxResults: Math.min(maxResults, 20), // cap at 20
+        order: 'relevance',
+        videoDefinition: 'high',
+        videoDuration: 'short', // Filter for short videos (< 4 minutes, includes Shorts)
+        safeSearch: 'strict',
+        videoCategoryId: '26' // YouTube category 26 = Howto & Style (includes cooking)
+      },
+      timeout: 10000
+    });
+
+    if (!youtubeResponse.data.items || youtubeResponse.data.items.length === 0) {
+      return res.json({
+        success: true,
+        videos: []
+      });
+    }
+
+    // Extract video details
+    const videos = youtubeResponse.data.items.map(item => ({
+      videoId: item.id.videoId,
+      title: item.snippet.title,
+      thumbnail: item.snippet.thumbnails.medium.url,
+      channelTitle: item.snippet.channelTitle,
+      description: item.snippet.description
+    }));
+
+    console.log(`Discover: found ${videos.length} videos`);
+
+    res.json({
+      success: true,
+      videos: videos
+    });
+
+  } catch (error) {
+    console.error('YouTube discover error:', error.message);
+    
+    if (error.response) {
+      console.error('YouTube API error status:', error.response.status);
+      console.error('YouTube API error data:', error.response.data);
+      return res.status(error.response.status).json({
+        success: false,
+        error: `YouTube API error: ${error.response.data?.error?.message || error.response.statusText}`
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error while fetching discover videos: ' + error.message
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Chef Claude server is running' });

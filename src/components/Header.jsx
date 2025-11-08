@@ -1,13 +1,18 @@
 // Header component with navigation between pages
-import { Link, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { supabase } from '../supabaseClient';
 
 export default function Header() {
   // Get current URL path to determine which nav item is active
   const location = useLocation();
+  const navigate = useNavigate();
   
   // State: controls whether mobile menu is open or closed
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // Ref to the header element for click-outside detection
+  const headerRef = useRef(null);
   
   // Helper function to check if a nav item is active based on current path
   const isActive = (path) => location.pathname === path;
@@ -26,8 +31,44 @@ export default function Header() {
     setIsMobileMenuOpen(false);
   };
   
+  /**
+   * Handle user logout
+   */
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+  
+  /**
+   * Close mobile menu when clicking outside
+   */
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // If menu is open and click is outside the header, close it
+      if (isMobileMenuOpen && headerRef.current && !headerRef.current.contains(event.target)) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    
+    // Add event listener when menu is open
+    if (isMobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+    
+    // Cleanup event listeners
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
+  
   return (
-    <header className="header">
+    <header className="header" ref={headerRef}>
       {/* Logo and Title */}
       <div className="header-left">
         <img src="/chef.png" alt="Chef Logo" className="logo" />
@@ -65,8 +106,20 @@ export default function Header() {
             <Link to="/cook" onClick={closeMobileMenu}>Cook</Link>
           </li>
           
-          {/* Discover page - placeholder for future feature */}
-          <li onClick={closeMobileMenu}>Discover</li>
+          {/* Discover page link - active when path is "/discover" */}
+          <li 
+            className={isActive('/discover') ? 'active' : ''} 
+            aria-current={isActive('/discover') ? 'page' : undefined}
+          >
+            <Link to="/discover" onClick={closeMobileMenu}>Discover</Link>
+          </li>
+          
+          {/* Logout button */}
+          <li className="logout-item">
+            <button onClick={handleLogout} className="logout-btn">
+              Logout
+            </button>
+          </li>
         </ul>
       </nav>
     </header>
