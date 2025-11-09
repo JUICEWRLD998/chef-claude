@@ -3,23 +3,9 @@
 ## STEP 1: Add Your Gemini API Key
 
 1. Open the file: `Chef-Claude/server/.env`
-2. Replace the empty value with your actual API key:
-   ```
-   GEMINI_API_KEY=your_actual_gemini_key_here
-   YOUTUBE_API_KEY=           # Leave empty for now (optional - see Step 5)
-   PORT=3001
-   ```
-3. Save the file
-
-**Get your API key here:** https://makersuite.google.com/app/apikey
-
----
-
 ## STEP 2: Start the Backend Server
 
-Open **PowerShell Terminal #1** and run:
 
-```powershell
 cd C:\Users\fadhm\OneDrive\Desktop\Chef-claude\server
 npm start
 ```

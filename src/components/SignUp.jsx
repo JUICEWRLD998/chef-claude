@@ -80,7 +80,7 @@ export default function SignUp() {
           {/* Success Message */}
           {success && (
             <div className="auth-success">
-              <p>✅ Account created! Check your email to verify. Redirecting...</p>
+              <p>Account created! Check your email to verify. Redirecting...</p>
             </div>
           )}
 
@@ -92,7 +92,7 @@ export default function SignUp() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder="Email"
               required
               disabled={loading || success}
             />

@@ -1,180 +1,133 @@
 # Chef Claude 🍳
 
-A smart recipe generator powered by Google's Gemini AI. Add your ingredients and let AI create delicious recipes for you!
+AI-powered recipe assistant with Supabase auth, Gemini-generated recipes, YouTube cook-alongs, and a Shorts-style Discover feed.
 
-## Features
+## Highlights
 
-- ✨ Add ingredients to your pantry list
-- 🤖 AI-powered recipe generation using Google Gemini
-- 📱 Mobile-first responsive design
-- 🔒 Secure API key management (server-side proxy)
-- 🎨 Clean, modern UI
+- ✨ Ingredient list → 🤖 Gemini AI recipes
+- ▶️ Cook page: YouTube tutorial auto-matched to your recipe
+- 📺 Discover: vertical scrolling food shorts feed
+- 🔐 Email/password auth (Supabase) with protected routes
+- 📱 Mobile-first, hamburger navigation with click-outside to close
+- 👁️ Password visibility toggle on Login/Sign Up
+- 🔑 API keys kept server-side via Express proxy
 
 ## Project Structure
 
 ```
 Chef-Claude/
-├── src/                    # React frontend
-│   ├── App.jsx            # Main app component
-│   ├── header.jsx         # Header component
-│   ├── main.jsx           # Main content (ingredient list + recipe)
-│   ├── index.jsx          # React entry point
-│   └── index.css          # Global styles
-├── server/                # Express backend (API proxy)
-│   ├── index.js           # Server entry point
-│   ├── package.json       # Server dependencies
-│   ├── .env               # Environment variables (DO NOT COMMIT!)
-│   └── .env.example       # Template for .env file
-└── index.html             # HTML entry point
+├── src/
+│   ├── App.jsx
+│   ├── index.css
+│   ├── supabaseClient.js
+│   ├── components/
+│   │   ├── Header.jsx
+│   │   ├── Main.jsx        # Generate (ingredients + recipe)
+│   │   ├── Cook.jsx        # YouTube video for current recipe
+│   │   ├── Discover.jsx    # Shorts-style feed
+│   │   ├── Login.jsx
+│   │   ├── SignUp.jsx
+│   │   └── ProtectedRoute.jsx
+├── server/
+│   ├── index.js            # Express API proxy (Gemini + YouTube)
+│   └── package.json
+└── .env.local              # Frontend env (not committed)
 ```
 
-## Setup Instructions
+## Setup
 
-### Prerequisites
+### 1) Backend env (server/.env)
 
-- Node.js (v16 or higher)
-- npm or yarn
-- A Google Gemini API key ([Get one here](https://makersuite.google.com/app/apikey))
+Create `server/.env` with:
 
-### 1. Install Frontend Dependencies
+```
+GEMINI_API_KEY=your_gemini_api_key
+YOUTUBE_API_KEY=your_youtube_api_key   # optional (Cook/Discover)
+PORT=3001
+# After deploying frontend, set this to your site URL for CORS
+FRONTEND_URL=https://your-frontend.example.com
+```
+
+### 2) Frontend env (.env.local)
+
+Create `.env.local` at project root:
+
+```
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# Local dev backend URL; in production set this in your hosting env
+VITE_API_URL=http://localhost:3001
+```
+
+### 3) Install & Run (local)
 
 ```powershell
-# From the project root (Chef-Claude folder)
+# From project root
 npm install
+
+# Backend
+cd server; npm install; npm start
+
+# New terminal - Frontend
+cd ..; npm run dev
 ```
 
-### 2. Install Server Dependencies
+Open http://localhost:5173
 
-```powershell
-# Navigate to the server folder
-cd server
+## Authentication (Supabase)
 
-# Install server packages
-npm install
+- Routes: `/login`, `/signup`
+- Protected pages: `/`, `/cook`, `/discover` (wrapped in `ProtectedRoute`)
+- Email verification may be required depending on your Supabase settings
+- Required frontend env: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
 
-# Go back to project root
-cd ..
-```
+## Pages
 
-### 3. Configure API Key
+- Generate (Home): add ingredients, get AI recipe
+- Cook: auto-searches YouTube for your recipe tutorial
+- Discover: vertical feed of short food videos (YouTube Data API)
 
-```powershell
-# In the server folder, copy the example env file
-cd server
-Copy-Item .env.example .env
+## Deployment (summary)
 
-# Now edit server/.env and add your actual Gemini API key:
-# GEMINI_API_KEY=your_actual_key_here
-```
+Deploy backend first, then frontend.
 
-**IMPORTANT:** Never commit your `.env` file to Git! It should already be in `.gitignore`.
+1) Backend (Render recommended)
 
-### 4. Run the Application
+- Root Directory: `server`
+- Build Command: `npm install` (a `build` script isn’t required for Node server)
+- Start Command: `npm start`
+- Env vars: `GEMINI_API_KEY`, `YOUTUBE_API_KEY`, `PORT`, `FRONTEND_URL`, `NODE_ENV=production`
+- After deploy, note your backend URL, e.g. `https://chef-claude-server.onrender.com`
 
-You need to run **both** the frontend and backend servers:
+2) Frontend (Vercel/Netlify)
 
-#### Terminal 1 - Start the Backend Server
+- Set env vars:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_API_URL` = your backend URL from step 1
+- Build command: `npm run build`
+- Output dir: `dist`
 
-```powershell
-# From the server folder
-cd server
-npm start
+3) CORS
 
-# Or use nodemon for auto-restart during development:
-npm run dev
-```
+- Add your deployed frontend URL to the backend env as `FRONTEND_URL`
+- Redeploy backend
 
-You should see:
-```
-🍳 Chef Claude server running on http://localhost:3001
-✅ CORS enabled for: http://localhost:5173
-🔐 API Key status: Configured
-```
+## Health & Smoke Tests
 
-#### Terminal 2 - Start the Frontend (Vite Dev Server)
-
-```powershell
-# From the project root
-npm run dev
-```
-
-You should see:
-```
-VITE v5.x.x  ready in xxx ms
-
-➜  Local:   http://localhost:5173/
-```
-
-### 5. Open the App
-
-Open your browser and navigate to: **http://localhost:5173**
-
-## How to Use
-
-1. **Add Ingredients**: Type an ingredient (e.g., "tomato") and click "Add ingredient"
-2. **Build Your List**: Add as many ingredients as you have
-3. **Generate Recipe**: Click "Get Recipe" and let the AI create a custom recipe
-4. **Enjoy Cooking**: Follow the AI-generated recipe instructions!
-
-## Security Notes
-
-⚠️ **IMPORTANT:**
-- This app uses a **secure server proxy** to protect your API key
-- Your Gemini API key is stored in `server/.env` and **never exposed to the browser**
-- Always add `.env` to `.gitignore` before committing
-- Never share your API key publicly
+- Backend health: `GET /health` → `{ status: 'ok' }`
+- Recipe generate: `POST /api/generate` with `{ ingredients: ["egg","rice"] }`
+- YouTube search (Cook): `POST /api/youtube-search`
+- YouTube discover: `POST /api/youtube-discover`
 
 ## Troubleshooting
 
-### "Could not connect to the recipe server"
+- Blank page after deploy → Set frontend envs (especially `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`), and ensure `VITE_API_URL` points to deployed backend; redeploy.
+- `supabaseUrl is required` → Frontend envs missing on hosting platform.
+- "Could not connect to the recipe server" → Backend not reachable; deploy backend and set `VITE_API_URL` in frontend.
+- CORS errors → Set `FRONTEND_URL` on backend to your deployed frontend, then redeploy backend.
+- Invalid login credentials → Confirm user exists and email is verified in Supabase Dashboard → Authentication → Users.
 
-**Solution:** Make sure the backend server is running on port 3001
-```powershell
-cd server
-npm start
-```
 
-### "API Key not configured"
-
-**Solution:** 
-1. Check that `server/.env` exists (not just `.env.example`)
-2. Open `server/.env` and verify your API key is set:
-   ```
-   GEMINI_API_KEY=your_actual_key_here
-   ```
-3. Restart the server after adding the key
-
-### Port 3001 already in use
-
-**Solution:** Either kill the process using port 3001, or change the port in `server/.env`:
-```
-PORT=3002
-```
-Then update the fetch URL in `src/main.jsx` to match.
-
-## Development
-
-### Project Technologies
-
-- **Frontend:** React (Vite), CSS
-- **Backend:** Express.js, CORS, dotenv
-- **AI:** Google Gemini API (gemini-pro model)
-
-### Code Structure
-
-- `src/main.jsx` - Contains all ingredient management logic and recipe generation
-- `server/index.js` - Secure proxy that calls Gemini API
-- `src/index.css` - Mobile-first styling with clean, modern design
-
-### Making Changes
-
-1. Frontend changes auto-reload (Vite HMR)
-2. Server changes require restart (use `npm run dev` with nodemon for auto-restart)
-
-## License
-
-MIT
-
-## Credits
-
-Built with ❤️ using React, Vite, Express, and Google Gemini AI
+Built with ❤️ using React, Vite, Express, Supabase, Google Gemini, and YouTube Data API.
